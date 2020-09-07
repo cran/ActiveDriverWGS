@@ -14,11 +14,12 @@ data(cancer_gene_sites)
 gr_site_coords = GRanges(seqnames = cancer_gene_sites$chr,
                          IRanges(start = cancer_gene_sites$start,
                                  end = cancer_gene_sites$end),
-                         mocols = cancer_gene_sites$id)
+                         mcols = gsub("(.+) (.+) (.+)", "\\1", cancer_gene_sites$id))
 # loading mutations
 data(cll_mutations)
 
-cll_mutations = format_muts(cll_mutations,
+this_genome = BSgenome.Hsapiens.UCSC.hg19::Hsapiens
+cll_mutations = format_muts(cll_mutations, this_genome = this_genome,
                             filter_hyper_MB = 30)
 
 gr_maf = GRanges(cll_mutations$chr,
@@ -28,7 +29,7 @@ gr_maf = GRanges(cll_mutations$chr,
 
 id = "XPO1"
 
-result = ADWGS_test(id, gr_element_coords, gr_site_coords, gr_maf, 50000)
+result = ADWGS_test(id, gr_element_coords, gr_site_coords, gr_maf, 50000, this_genome)
 
 test_that("filter_hyper_MB is a positive integer",{
 

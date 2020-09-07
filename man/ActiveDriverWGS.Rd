@@ -4,8 +4,16 @@
 \alias{ActiveDriverWGS}
 \title{ActiveDriverWGS is a driver discovery tool for simple somatic mutations in cancer whole genomes}
 \usage{
-ActiveDriverWGS(mutations, elements, sites = NULL, window_size = 50000,
-  filter_hyper_MB = 30, recovery.dir = NULL, mc.cores = 1)
+ActiveDriverWGS(
+  mutations,
+  elements,
+  sites = NULL,
+  window_size = 50000,
+  filter_hyper_MB = 30,
+  recovery.dir = NULL,
+  mc.cores = 1,
+  ref_genome = "hg19"
+)
 }
 \arguments{
 \item{mutations}{A data frame containing the following columns: chr, pos1, pos2, ref, alt, patient.
@@ -13,8 +21,8 @@ ActiveDriverWGS(mutations, elements, sites = NULL, window_size = 50000,
     \item{chr}{autosomal chromosomes as chr1 to chr22 and sex chromosomes as chrX and chrY}
     \item{pos1}{the start position of the mutation in base 1 coordinates}
     \item{pos2}{the end position of the mutation in base 1 coordinates}
-    \item{ref}{the reference allele as a string containing the bases A, T, C or G}
-    \item{alt}{the alternate allele as a string containing the bases A, T, C or G}
+    \item{ref}{the reference allele as a string containing the bases A, T, C, G or -}
+    \item{alt}{the alternate allele as a string containing the bases A, T, C, G or -}
     \item{patient}{the patient identifier as a string}
 }}
 
@@ -34,14 +42,11 @@ ActiveDriverWGS(mutations, elements, sites = NULL, window_size = 50000,
     \item{chr}{autosomal chromosomes as chr1 to chr22 and sex chromosomes as chrX and chrY}
     \item{start}{the start position of the site in base 0 coordinates (BED format)}
     \item{end}{the end position of the site in base 0 coordinates (BED format)}
-    \item{id}{the site identifier - each site should contain only 1 segment and a unique id. If ids are duplicated,
-    each segment of the site will be treated as an individual site. Sites can be coding or noncoding such as
-    phosphosites of protein coding genes in genomic coordinates or transcription factor binding sites of active
-    enhancers.}
+    \item{id}{the identifier of the element. id's need to match with those listed in the object elements. }
 }}
 
-\item{window_size}{An integer indicating the size of the background window in base pairs for which the
-mutation rate is expected to remain the same. The default is 50000bps.}
+\item{window_size}{An integer indicating the size of the background window in base pairs that is used to establish
+the expected mutation rate and respective null model. The default is 50000bps}
 
 \item{filter_hyper_MB}{Hyper-mutated samples carry many passenger mutations and dilute the signal of true drivers.
 Samples with a rate greater than \code{filter_hyper_MB} mutations per megabase are excluded.
@@ -52,6 +57,8 @@ If the parameter is unspecified, recovery files will not be saved. As an ActiveD
 specifying a recovery directory will recover previously computed results if a query is interrupted.}
 
 \item{mc.cores}{The number of cores which can be used if multiple cores are available. The default is 1.}
+
+\item{ref_genome}{The reference genome used on the analysis. The default option is "hg19", other options are "hg38", "mm9" and "mm10".}
 }
 \value{
 A data frame containing the results of driver discovery containing the following columns: id, pp_element,
@@ -84,6 +91,6 @@ some_genes = c("ATM", "MYD88", "NOTCH1", "SF3B1", "XPO1",
 "SOCS1", "CNOT3", "DDX3X", "KMT2A", "HIF1A", "APC")
 
 result = ActiveDriverWGS(mutations = cll_mutations,
-elements = cancer_genes[cancer_genes$id \%in\% some_genes,])
+		elements = cancer_genes[cancer_genes$id \%in\% some_genes,])
 }
 }

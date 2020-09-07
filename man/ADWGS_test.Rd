@@ -4,8 +4,14 @@
 \alias{ADWGS_test}
 \title{ADWGS_test executes the statistical test for ActiveDriverWGS}
 \usage{
-ADWGS_test(id, gr_element_coords, gr_site_coords, gr_maf, win_size,
-  element_bias = T)
+ADWGS_test(
+  id,
+  gr_element_coords,
+  gr_site_coords,
+  gr_maf,
+  win_size,
+  this_genome
+)
 }
 \arguments{
 \item{id}{A string used to identify the element of interest. \code{id}
@@ -23,11 +29,10 @@ nullifies the requirement for sites to exist.}
 \item{gr_maf}{A GenomicRanges object that describes the mutations in the dataset containing the chromosome,
 start and end coordinates, patient id, and trinucleotide context}
 
-\item{win_size}{An integer indicating the size of the background window in base pairs for which the
-mutation rate is expected to remain the same. The default is 50000bps.}
+\item{win_size}{An integer indicating the size of the background window in base pairs that is used to establish
+the expected mutation rate and respective null model. The default is 50000bps}
 
-\item{element_bias}{A boolean indicating whether or not indels should be counted by their midpoints
-or with bias towards the element}
+\item{this_genome}{The reference genome object of BSgenome, for example BSgenome.Hsapiens.UCSC.hg19::Hsapiens}
 }
 \value{
 A data frame containing the following columns
@@ -63,9 +68,12 @@ mcols = cancer_genes$id)
 # Sites (NULL)
 gr_site_coords = GRanges(c(seqnames=NULL,ranges=NULL,strand=NULL))
 
+# Reference genome
+this_genome = BSgenome.Hsapiens.UCSC.hg19::Hsapiens
+
 # Mutations
 data(cll_mutations)
-cll_mutations = format_muts(cll_mutations)
+cll_mutations = format_muts(cll_mutations, this_genome = this_genome)
 
 gr_maf = GRanges(cll_mutations$chr,
 IRanges(cll_mutations$pos1, cll_mutations$pos2),
@@ -73,6 +81,7 @@ mcols=cll_mutations[,c("patient", "tag")])
 
 # ADWGS_test
 id = "ATM"
-result = ADWGS_test(id, gr_element_coords, gr_site_coords, gr_maf, 50000)
+result = ADWGS_test(id, gr_element_coords, gr_site_coords, gr_maf, 
+	win_size = 50000, this_genome = this_genome)
 }
 }
