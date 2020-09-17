@@ -1,7 +1,7 @@
-c764f44a1653a85b544e75e67ed996d4 *DESCRIPTION
+b19be782b77d953d86560cbb612dc5e9 *DESCRIPTION
 ae24aa4e46a825671b91532c20e3e5c6 *NAMESPACE
-93d44bc1dafa930efe00c6463ea17ea7 *NEWS.md
-cdf51f31cf437d9be2e978b0ecde1121 *R/ADWGS_test.R
+eb6234800c22cab4c93479ac0fe01598 *NEWS.md
+361c672d29a2e0672a7e13b4fe0219fa *R/ADWGS_test.R
 86b10e0fee7e81b3e1b1da14fde08bcd *R/ActiveDriverWGS.R
 f930007696bc69575683140b323af4bd *R/cancer_gene_sites-data.R
 ef49dae15e08f2d92f5a5c2723d0c9d7 *R/cancer_genes-data.R
@@ -9,7 +9,7 @@ ba565b5a300a2f0e01dc089e57728522 *R/cll-data.R
 260105e6323557898a93cfa415b83ee5 *R/fix_all_results.R
 53d6b0e636851619eee3481ed7d798e7 *R/format_muts.R
 44bc4f2ea4a0fd9541ba01525b77e3c5 *R/prepare_elements.R
-2e4500f633059598fac75a954956bad9 *README.md
+e0f941f6da37763e6a0abde14e8a18c5 *README.md
 3dc68f1d2eaafaa398ae54a69a016278 *build/vignette.rds
 40183e378454d5acf965bd8a6aba83e2 *data/cancer_gene_sites.RData
 15158efce7e07c6262a5af48827644d4 *data/cancer_genes.RData
@@ -38,7 +38,7 @@ e0154af1df884228578c38a790073ad1 *man/cancer_genes.Rd
 ab2348a272628d5a08bd543de685c300 *man/cll_mutations.Rd
 0670a2d21c31235e440c7cdbbcf29e61 *man/dot-fix_all_results.Rd
 207bf0617f86c7c25cb13ba70e86575f *man/dot-get_3n_context_of_mutations.Rd
-d296b68f2e5012478ed416aad2d6a3ba *man/dot-get_obs_exp.Rd
+0252b6e6b801765a4b6d5cb8b8ade543 *man/dot-get_obs_exp.Rd
 ed88dbf53573d1e4163cbe1b019babeb *man/dot-get_signf_results.Rd
 b415402abb9f076ea494484e8986b573 *man/dot-make_mut_signatures.Rd
 3e266af5e53071dc7ff50908401a0e57 *man/dot-split_coord_fragments_in_BED.Rd
