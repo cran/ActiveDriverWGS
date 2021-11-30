@@ -248,7 +248,6 @@ test_that("recover.dir is appropriate",{
                                recovery.dir = 2),
                "recovery.dir must be a string")
 })
-
 test_that("mc.cores is a positive integer",{
   expect_error(ActiveDriverWGS(elements = cancer_genes,
                                mutations = cll_mutations,
@@ -260,4 +259,5 @@ test_that("mc.cores is a positive integer",{
                                mc.cores = "a"),
                "mc.cores must be a positive integer")
 })
+
 

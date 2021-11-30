@@ -106,20 +106,23 @@ ActiveDriverWGS = function(mutations,
 		stop("ref_genome must one of 'hg19', 'hg38', 'mm9', 'mm10'")
 	}
 	
+	hg_permitted_chrs = paste0("chr", c(1:22, "X", "Y", "M"))
+	mm_permitted_chrs = paste0("chr", c(1:19, "X", "Y", "M"))
+	
 	this_genome = BSgenome.Hsapiens.UCSC.hg19::Hsapiens
-	permitted_chrs = paste0("chr", c(1:22, "X", "Y"))
+	permitted_chrs = hg_permitted_chrs
 	
 	if (ref_genome == 'hg38') {
 		this_genome = BSgenome.Hsapiens.UCSC.hg38::Hsapiens
-		permitted_chrs = paste0("chr", c(1:22, "X", "Y"))
+		permitted_chrs = hg_permitted_chrs
 	}
 	if (ref_genome == 'mm9') {
 		this_genome = BSgenome.Mmusculus.UCSC.mm9::Mmusculus
-		permitted_chrs = paste0("chr", c(1:19, "X", "Y"))
+		permitted_chrs = mm_permitted_chrs
 	}
 	if (ref_genome == 'mm10') {
 		this_genome = BSgenome.Mmusculus.UCSC.mm10::Mmusculus
-		permitted_chrs = paste0("chr", c(1:19, "X", "Y"))
+		permitted_chrs = mm_permitted_chrs
 	}
 	
 	# Verifying Format for recovery.dir
@@ -248,14 +251,16 @@ ActiveDriverWGS = function(mutations,
 	# Running ADWGS Test
 	all_results = NULL
 	
-	# Pre-Filtering Results
-	mutated_elements = sort(unique(gr_element_coords$mcols[S4Vectors::queryHits(suppressWarnings(GenomicRanges::findOverlaps(gr_element_coords, gr_muts)))]))
+	# Pre-Filtering Results - only elements with 1+ mutation are analyzed, the rest assigned NA
+	# for speeding up computation
+	muts_elements_overlap = suppressWarnings(GenomicRanges::findOverlaps(gr_element_coords, gr_muts))
+	mutated_elements = sort(unique(gr_element_coords$mcols[S4Vectors::queryHits(muts_elements_overlap)]))
 	unmutated_elements = sort(unique(gr_element_coords$mcols[!gr_element_coords$mcols %in% mutated_elements]))
 	not_done = mutated_elements
 	
 	# Unmutated Results
 	unmutated_results = NULL
-	if(length(unmutated_elements) > 9){
+	if(length(unmutated_elements) > 0){
 		unmutated_results = data.frame(id = unmutated_elements,
 				pp_element = NA, element_muts_obs = NA, element_muts_exp = NA, element_enriched = NA,
 				pp_site = NA, site_muts_obs = NA, site_muts_exp = NA, site_enriched = NA,
