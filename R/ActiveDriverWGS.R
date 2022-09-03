@@ -44,6 +44,7 @@
 #' @param mc.cores The number of cores which can be used if multiple cores are available. The default is 1.
 #' 
 #' @param ref_genome The reference genome used on the analysis. The default option is "hg19", other options are "hg38", "mm9" and "mm10". 
+#' @param detect_depleted_mutations if TRUE, detect elements with significantly fewer than expected mutations. FALSE by default
 #'
 #' @return A data frame containing the results of driver discovery containing the following columns: id, pp_element,
 #' element_muts_obs, element_muts_exp, element_enriched, pp_site, site_muts_obs, site_muts_exp, site_enriched,
@@ -83,7 +84,8 @@ ActiveDriverWGS = function(mutations,
 							filter_hyper_MB = 30,
 							recovery.dir = NULL,
 							mc.cores = 1,
-							ref_genome = "hg19"){
+							ref_genome = "hg19", 
+							detect_depleted_mutations = FALSE){
 
 	# Verifying Format for window_size
 	if (!(length(window_size) == 1 && is.numeric(window_size) && window_size > 0)) {
@@ -282,7 +284,7 @@ ActiveDriverWGS = function(mutations,
 		
 		recovered_results = do.call(rbind, lapply(results_filenames, function(filename) {
 			load_result = suppressWarnings(try(load(paste0(recovery.dir, filename)), silent = TRUE))
-			if (class(load_result) == "try-error") return(NULL)
+			if (inherits(load_result, "try-error")) return(NULL)
 			result = result
 		}))
 		recovered_result_numbers = recovered_results$result_number
@@ -306,7 +308,8 @@ ActiveDriverWGS = function(mutations,
 		result = ADWGS_test(
 				id = not_done[i], gr_element_coords = gr_element_coords,
 				gr_site_coords = gr_site_coords, gr_maf = gr_muts,
-				win_size = window_size, this_genome = this_genome)
+				win_size = window_size, this_genome = this_genome, 
+				detect_depleted_mutations = detect_depleted_mutations)
 
 		# save each result into recovery dir if requested
 		if (!is.null(recovery.dir)) {
