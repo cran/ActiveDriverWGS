@@ -111,18 +111,23 @@ ActiveDriverWGS = function(mutations,
 	hg_permitted_chrs = paste0("chr", c(1:22, "X", "Y", "M"))
 	mm_permitted_chrs = paste0("chr", c(1:19, "X", "Y", "M"))
 	
-	this_genome = BSgenome.Hsapiens.UCSC.hg19::Hsapiens
-	permitted_chrs = hg_permitted_chrs
-	
+	if (ref_genome == "hg19") {
+#		require(BSgenome.Hsapiens.UCSC.hg19)
+		this_genome = BSgenome.Hsapiens.UCSC.hg19::Hsapiens
+		permitted_chrs = hg_permitted_chrs
+	}	
 	if (ref_genome == 'hg38') {
+#		require(BSgenome.Hsapiens.UCSC.hg38)
 		this_genome = BSgenome.Hsapiens.UCSC.hg38::Hsapiens
 		permitted_chrs = hg_permitted_chrs
 	}
 	if (ref_genome == 'mm9') {
+#		require(BSgenome.Mmusculus.UCSC.mm9)
 		this_genome = BSgenome.Mmusculus.UCSC.mm9::Mmusculus
 		permitted_chrs = mm_permitted_chrs
 	}
 	if (ref_genome == 'mm10') {
+#		require(BSgenome.Mmusculus.UCSC.mm10)
 		this_genome = BSgenome.Mmusculus.UCSC.mm10::Mmusculus
 		permitted_chrs = mm_permitted_chrs
 	}
@@ -209,6 +214,18 @@ ActiveDriverWGS = function(mutations,
 	if (!(is.numeric(elements$start) && is.numeric(elements$end))) {
 		stop("start and end must be numeric")
 	}
+	if (any(elements$start < 2) | any(elements$end < 2)) {
+		bad_ids = unique(elements$id[elements$start < 2 | elements$end < 2])
+		stop(paste0("elements contain coordinates below 2 for the following ids: ",
+				paste(bad_ids, collapse = ", ")))
+	}
+	chrom_lengths = GenomeInfoDb::seqlengths(this_genome)
+	element_max_coord = chrom_lengths[elements$chr] - 1
+	if (any(elements$end > element_max_coord)) {
+		bad_ids = unique(elements$id[elements$end > element_max_coord])
+		stop(paste0("elements contain coordinates beyond chromosome ends for the following ids: ",
+				paste(bad_ids, collapse = ", ")))
+	}
 	if (!(is.character(elements$id))) {
 		stop("element identifier must be a string")
 	}
@@ -239,6 +256,17 @@ ActiveDriverWGS = function(mutations,
 		if (!(is.numeric(sites$start) && is.numeric(sites$end))) {
 			stop("start and end must be numeric")
 		}
+		if (any(sites$start < 2) | any(sites$end < 2)) {
+			bad_ids = unique(sites$id[sites$start < 2 | sites$end < 2])
+			stop(paste0("sites contain coordinates below 2 for the following ids: ",
+					paste(bad_ids, collapse = ", ")))
+		}
+		site_max_coord = chrom_lengths[sites$chr] - 1
+		if (any(sites$end > site_max_coord)) {
+			bad_ids = unique(sites$id[sites$end > site_max_coord])
+			stop(paste0("sites contain coordinates beyond chromosome ends for the following ids: ",
+					paste(bad_ids, collapse = ", ")))
+		}
 		if (!(is.character(sites$id))) {
 			stop("site identifier must be a string")
 		}
@@ -255,7 +283,7 @@ ActiveDriverWGS = function(mutations,
 	
 	# Pre-Filtering Results - only elements with 1+ mutation are analyzed, the rest assigned NA
 	# for speeding up computation
-	muts_elements_overlap = suppressWarnings(GenomicRanges::findOverlaps(gr_element_coords, gr_muts))
+	muts_elements_overlap = suppressWarnings(GenomicRanges::findOverlaps(gr_element_coords, gr_muts, ignore.strand = TRUE))
 	mutated_elements = sort(unique(gr_element_coords$mcols[S4Vectors::queryHits(muts_elements_overlap)]))
 	unmutated_elements = sort(unique(gr_element_coords$mcols[!gr_element_coords$mcols %in% mutated_elements]))
 	not_done = mutated_elements
@@ -271,7 +299,7 @@ ActiveDriverWGS = function(mutations,
 	if(!(is.null(recovery.dir))){
 		unmutated_results$result_number = 1:length(unmutated_elements) + length(mutated_elements)
 	}
-	cat("Number of Elements with 0 Mutations: ", length(unmutated_elements), "\n")
+	warning(paste0("Number of Elements with 0 Mutations: ", length(unmutated_elements), "\n"))
 	
 	# Recovered Results
 	recovered_results = NULL
@@ -290,15 +318,15 @@ ActiveDriverWGS = function(mutations,
 		recovered_result_numbers = recovered_results$result_number
 	}
 	
-	cat("Tests to do: ", length(not_done), "\n")
+	warning(paste0("Tests to do: ", length(not_done), "\n"))
 	if (length(recovered_result_numbers) > 0) {
-		cat("Tests recovered: ", length(unique(recovered_result_numbers)), "\n")
+		warning(paste0("Tests recovered: ", length(unique(recovered_result_numbers)), "\n"))
 	}
 	
 	# Mutated Results
 	mutated_results = do.call(rbind, parallel::mclapply(1:length(not_done), function(i) {
 		if (i %% 100 == 0) {
-			cat(i, " elements completed\n")
+			warning(paste0(i, " elements completed\n"))
 		}
 		
 		# skip calculation if this item is completed already

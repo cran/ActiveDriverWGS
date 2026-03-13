@@ -19,7 +19,7 @@
 .split_coord_fragments_in_BED = function(i, coords) {
 
   # Progress Update
-  if (i %% 100 == 0) cat(i, " ")
+  if (i %% 100 == 0) warning(paste0(i, " "))
 
   # Retrieving coords
   n_regions =  as.numeric(coords[i, "V10"])
@@ -76,12 +76,17 @@ prepare_elements_from_BED12 = function(fname) {
   if (!is.character(input$V4)) stop("Incorrect BED12 Format: IDs must be a character string")
 
   # Processing File
-  cat("\n", nrow(input), " Rows :: Processing row ")
+  warning(paste0("\n", nrow(input), " Rows :: Processing row "))
   coords = do.call(rbind, lapply(1:nrow(input), .split_coord_fragments_in_BED, input))
   coords = data.frame(coords, stringsAsFactors=F)
   coords$start = as.numeric(coords$start)
   coords$end = as.numeric(coords$end)
   # coords$frag_id = as.numeric(coords$frag_id) to exclude frag_id as a necessary column
+  if (any(coords$start < 2) | any(coords$end < 2)) {
+    bad_ids = unique(coords$id[coords$start < 2 | coords$end < 2])
+    stop(paste0("elements contain coordinates below 2 for the following ids: ",
+        paste(bad_ids, collapse = ", ")))
+  }
   dim1 = nrow(coords)
 
   # Filtering Regions for Those Identified on a Single Chromosome (Mitochondrial, Autosomal and Sex Chromosomes)
@@ -92,7 +97,7 @@ prepare_elements_from_BED12 = function(fname) {
   # remove repeated elements
   coords = unique(coords)
   dim2 = nrow(coords)
-  cat("\n Preparing Elements Complete \n RM", dim1-dim2, "lines\n")
+  warning(paste0("\n Preparing Elements Complete \n RM", dim1-dim2, "lines\n"))
   coords
 }
 
@@ -141,6 +146,11 @@ prepare_elements_from_BED4 = function(fname) {
   input = data.frame(input, stringsAsFactors = F)
   input$start = as.numeric(input$start)
   input$end = as.numeric(input$end)
+  if (any(input$start < 2) | any(input$end < 2)) {
+    bad_ids = unique(input$id[input$start < 2 | input$end < 2])
+    stop(paste0("elements contain coordinates below 2 for the following ids: ",
+        paste(bad_ids, collapse = ", ")))
+  }
   dim1 = nrow(input)
   
   # Filtering Regions for Those Identified on a Single Chromosome (Mitochondrial, Autosomal and Sex Chromosomes)
@@ -151,6 +161,6 @@ prepare_elements_from_BED4 = function(fname) {
   # remove repeated elements
   input = unique(input)
   dim2 = nrow(input)
-  cat("\n Preparing Elements Complete \n RM", dim1-dim2, "lines\n")
+  warning(paste0("\n Preparing Elements Complete \n RM", dim1-dim2, "lines\n"))
   input
 }
